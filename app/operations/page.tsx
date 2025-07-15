@@ -1,9 +1,37 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Briefcase, Clock, Target, TrendingUp, TrendingDown, CheckCircle } from "lucide-react"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Bar, BarChart, Line, LineChart, Pie, PieChart, Cell, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Briefcase,
+  Clock,
+  Target,
+  TrendingUp,
+  TrendingDown,
+  CheckCircle,
+} from "lucide-react";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  Bar,
+  BarChart,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  Cell,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 const jobOrderData = [
   { month: "Jan", total: 298, filled: 267, pending: 31 },
@@ -12,7 +40,7 @@ const jobOrderData = [
   { month: "Apr", total: 334, filled: 295, pending: 39 },
   { month: "May", total: 356, filled: 312, pending: 44 },
   { month: "Jun", total: 342, filled: 298, pending: 44 },
-]
+];
 
 const fillRateData = [
   { region: "North", fillRate: 92, placements: 156 },
@@ -20,7 +48,7 @@ const fillRateData = [
   { region: "East", fillRate: 89, placements: 178 },
   { region: "West", fillRate: 85, placements: 142 },
   { region: "Central", fillRate: 91, placements: 167 },
-]
+];
 
 const timeToFillData = [
   { month: "Jan", avgDays: 14, target: 12 },
@@ -29,20 +57,20 @@ const timeToFillData = [
   { month: "Apr", avgDays: 11, target: 12 },
   { month: "May", avgDays: 12, target: 12 },
   { month: "Jun", avgDays: 12, target: 12 },
-]
+];
 
 const jobTypeData = [
   { type: "Permanent", count: 198, color: "#3b82f6" },
   { type: "Contract", count: 89, color: "#10b981" },
   { type: "Temporary", count: 55, color: "#f59e0b" },
-]
+];
 
 const placementTrendData = [
   { week: "Week 1", placements: 67, target: 70 },
   { week: "Week 2", placements: 72, target: 70 },
   { week: "Week 3", placements: 68, target: 70 },
   { week: "Week 4", placements: 74, target: 70 },
-]
+];
 
 export default function OperationsDashboard() {
   return (
@@ -50,8 +78,12 @@ export default function OperationsDashboard() {
       <div className="p-6">
         <div className="mb-8">
           <div className="flex items-center space-x-4 mb-4"></div>
-          <h1 className="text-3xl font-bold text-gray-900">Field Operations Dashboard</h1>
-          <p className="text-gray-600 mt-2">Detailed job orders and placement performance metrics</p>
+          <h1 className="text-3xl font-bold text-white">
+            Field Operations Dashboard
+          </h1>
+          <p className="text-white mt-2">
+            Detailed job orders and placement performance metrics
+          </p>
         </div>
 
         {/* Key Metrics Row */}
@@ -60,7 +92,9 @@ export default function OperationsDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Job Orders</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Total Job Orders
+                  </p>
                   <p className="text-3xl font-bold text-orange-600">342</p>
                   <p className="text-sm text-red-600 flex items-center mt-1">
                     <TrendingDown className="h-3 w-3 mr-1" />
@@ -76,7 +110,9 @@ export default function OperationsDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Fill Rate</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Fill Rate
+                  </p>
                   <p className="text-3xl font-bold text-green-600">87%</p>
                   <p className="text-sm text-green-600 flex items-center mt-1">
                     <TrendingUp className="h-3 w-3 mr-1" />
@@ -92,9 +128,13 @@ export default function OperationsDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Time to Fill</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Avg Time to Fill
+                  </p>
                   <p className="text-3xl font-bold text-blue-600">12</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">days</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    days
+                  </p>
                 </div>
                 <Clock className="h-8 w-8 text-blue-600" />
               </div>
@@ -105,7 +145,9 @@ export default function OperationsDashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Placement Rate</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Placement Rate
+                  </p>
                   <p className="text-3xl font-bold text-purple-600">91%</p>
                   <p className="text-sm text-green-600 flex items-center mt-1">
                     <TrendingUp className="h-3 w-3 mr-1" />
@@ -123,7 +165,9 @@ export default function OperationsDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>Job Orders Trend</CardTitle>
-              <CardDescription>Monthly job orders: total, filled, and pending</CardDescription>
+              <CardDescription>
+                Monthly job orders: total, filled, and pending
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ChartContainer
@@ -213,8 +257,19 @@ export default function OperationsDashboard() {
                     <XAxis dataKey="month" />
                     <YAxis />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Line type="monotone" dataKey="avgDays" stroke="#ef4444" strokeWidth={3} />
-                    <Line type="monotone" dataKey="target" stroke="#10b981" strokeWidth={2} strokeDasharray="5 5" />
+                    <Line
+                      type="monotone"
+                      dataKey="avgDays"
+                      stroke="#ef4444"
+                      strokeWidth={3}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="target"
+                      stroke="#10b981"
+                      strokeWidth={2}
+                      strokeDasharray="5 5"
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </ChartContainer>
@@ -244,7 +299,9 @@ export default function OperationsDashboard() {
                       cy="50%"
                       outerRadius={80}
                       dataKey="count"
-                      label={({ type, percent }) => `${type} ${(percent * 100).toFixed(0)}%`}
+                      label={({ type, percent }) =>
+                        `${type} ${percent ? (percent * 100).toFixed(0) : 0}%`
+                      }
                     >
                       {jobTypeData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
@@ -259,5 +316,5 @@ export default function OperationsDashboard() {
         </div>
       </div>
     </div>
-  )
+  );
 }
