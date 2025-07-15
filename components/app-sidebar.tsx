@@ -1,7 +1,8 @@
 "use client"
 
-import type * as React from "react"
-import { BarChart3, Briefcase, DollarSign, Home, Moon, Sun, Upload, Users, FileSpreadsheet } from "lucide-react"
+import * as React from "react"
+import { useState, useEffect } from "react"
+import { BarChart3, Briefcase, DollarSign, Home, Moon, Sun, Upload, Users, FileSpreadsheet, ChevronRight, Link2, Database, Globe } from "lucide-react"
 import { useTheme } from "next-themes"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -21,8 +22,7 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { ChevronRight } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 const data = {
   navMain: [
@@ -58,6 +58,22 @@ const data = {
       icon: Users,
     },
     {
+      title: "API Integrations",
+      icon: Link2,
+      items: [
+        {
+          title: "Connections",
+          url: "/api/connections",
+          icon: Globe,
+        },
+        {
+          title: "Data Sources",
+          url: "/api/sources",
+          icon: Database,
+        },
+      ],
+    },
+    {
       title: "Data Management",
       icon: Upload,
       items: [
@@ -84,17 +100,37 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { setTheme, theme } = useTheme()
   const pathname = usePathname()
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({})
+
+  // Initialize expanded state based on current path
+  useEffect(() => {
+    const newExpandedItems: Record<string, boolean> = {}
+    data.navMain.forEach((item) => {
+      if (item.items?.some((subItem) => pathname === subItem.url)) {
+        newExpandedItems[item.title] = true
+      }
+    })
+    setExpandedItems(newExpandedItems)
+  }, [pathname])
+
+  const toggleExpanded = (title: string) => {
+    setExpandedItems(prev => ({
+      ...prev,
+      [title]: !prev[title]
+    }))
+  }
 
   return (
     <Sidebar
-      collapsible="offcanvas"
-      className="group/sidebar-hover hover:w-64 transition-all duration-300 ease-in-out"
+      collapsible="icon"
+      className="group/sidebar w-[--sidebar-width-icon] hover:w-64 transition-all duration-300 ease-in-out"
       {...props}
     >
       <SidebarHeader>
         <div className="flex items-center gap-2 px-4 py-2">
           <BarChart3 className="h-6 w-6" />
-          <span className="font-semibold">Corporate Dashboard</span>
+          <span className="font-semibold hidden group-hover/sidebar:inline">Corporate Dashboard</span>
+          <span className="font-semibold inline group-hover/sidebar:hidden">CD</span>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -102,63 +138,69 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               {data.navMain.map((item) => (
-                <Collapsible
-                  key={item.title}
-                  asChild
-                  defaultOpen={item.items?.some((subItem) => pathname === subItem.url)}
-                  className="group/collapsible"
-                >
-                  <SidebarMenuItem>
-                    {item.items ? (
-                      <>
-                        <CollapsibleTrigger asChild>
-                          <SidebarMenuButton
-                            tooltip={item.title}
-                            className="hover:bg-orange-500 hover:text-white transition-colors duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:group-hover/sidebar-hover:justify-start"
-                          >
-                            {item.icon && <item.icon />}
-                            <span className="group-data-[collapsible=icon]:group-hover/sidebar-hover:block group-data-[collapsible=icon]:hidden">
-                              {item.title}
-                            </span>
-                            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:group-hover/sidebar-hover:block group-data-[collapsible=icon]:hidden" />
-                          </SidebarMenuButton>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="group-data-[collapsible=icon]:group-hover/sidebar-hover:block group-data-[collapsible=icon]:hidden">
-                          <SidebarMenuSub>
-                            {item.items?.map((subItem) => (
-                              <SidebarMenuSubItem key={subItem.title}>
-                                <SidebarMenuSubButton
-                                  asChild
-                                  isActive={pathname === subItem.url}
-                                  className="hover:bg-orange-400 hover:text-white transition-colors duration-200"
-                                >
-                                  <Link href={subItem.url}>
-                                    {subItem.icon && <subItem.icon />}
-                                    <span>{subItem.title}</span>
-                                  </Link>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            ))}
-                          </SidebarMenuSub>
-                        </CollapsibleContent>
-                      </>
-                    ) : (
+                <SidebarMenuItem key={item.title} className="relative">
+                  {item.items ? (
+                    <>
                       <SidebarMenuButton
                         tooltip={item.title}
-                        asChild
-                        isActive={pathname === item.url}
-                        className="hover:bg-orange-500 hover:text-white transition-colors duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:group-hover/sidebar-hover:justify-start"
+                        onClick={() => toggleExpanded(item.title)}
+                        className="hover:bg-orange-500 hover:text-white transition-colors duration-200 justify-center group-hover/sidebar:justify-start"
                       >
-                        <Link href={item.url || "#"}>
-                          {item.icon && <item.icon />}
-                          <span className="group-data-[collapsible=icon]:group-hover/sidebar-hover:block group-data-[collapsible=icon]:hidden">
-                            {item.title}
-                          </span>
-                        </Link>
+                        {item.icon && <item.icon />}
+                        <span className="hidden group-hover/sidebar:block">
+                          {item.title}
+                        </span>
+                        <ChevronRight 
+                          className={cn(
+                            "ml-auto hidden group-hover/sidebar:block transition-transform duration-200", 
+                            expandedItems[item.title] && "rotate-90"
+                          )} 
+                        />
                       </SidebarMenuButton>
-                    )}
-                  </SidebarMenuItem>
-                </Collapsible>
+                      
+                      {/* Submenu items */}
+                      <div 
+                        className={cn(
+                          "overflow-hidden transition-all duration-300 ease-in-out",
+                          !expandedItems[item.title] && "h-0",
+                          expandedItems[item.title] && "h-auto",
+                          "hidden group-hover/sidebar:block"
+                        )}
+                      >
+                        <SidebarMenuSub>
+                          {item.items?.map((subItem) => (
+                            <SidebarMenuSubItem key={subItem.title}>
+                              <SidebarMenuSubButton
+                                asChild
+                                isActive={pathname === subItem.url}
+                                className="hover:bg-orange-400 hover:text-white transition-colors duration-200"
+                              >
+                                <Link href={subItem.url}>
+                                  {subItem.icon && <subItem.icon />}
+                                  <span>{subItem.title}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </div>
+                    </>
+                  ) : (
+                    <SidebarMenuButton
+                      tooltip={item.title}
+                      asChild
+                      isActive={pathname === item.url}
+                      className="hover:bg-orange-500 hover:text-white transition-colors duration-200 justify-center group-hover/sidebar:justify-start"
+                    >
+                      <Link href={item.url || "#"}>
+                        {item.icon && <item.icon />}
+                        <span className="hidden group-hover/sidebar:block">
+                          {item.title}
+                        </span>
+                      </Link>
+                    </SidebarMenuButton>
+                  )}
+                </SidebarMenuItem>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
@@ -170,10 +212,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               tooltip="Toggle theme"
-              className="hover:bg-orange-500 hover:text-white transition-colors duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:group-hover/sidebar-hover:justify-start"
+              className="hover:bg-orange-500 hover:text-white transition-colors duration-200 justify-center group-hover/sidebar:justify-start"
             >
               {theme === "dark" ? <Sun /> : <Moon />}
-              <span className="group-data-[collapsible=icon]:group-hover/sidebar-hover:block group-data-[collapsible=icon]:hidden">
+              <span className="hidden group-hover/sidebar:block">
                 Toggle Theme
               </span>
             </SidebarMenuButton>
