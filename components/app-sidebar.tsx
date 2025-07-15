@@ -71,6 +71,11 @@ const data = {
           url: "/api/sources",
           icon: Database,
         },
+        {
+          title: "ADP Test",
+          url: "/api/adp-test",
+          icon: FileSpreadsheet,
+        },
       ],
     },
     {
