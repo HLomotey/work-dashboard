@@ -193,7 +193,7 @@ export function useRooms(propertyId?: string, filters?: HousingFilters) {
   const supabase = createClient();
 
   const fetcher = useCallback(async () => {
-    let query = supabase.from("rooms").select("*").order("room_number");
+    let query = supabase.from("room").select("*").order("room_number");
 
     if (propertyId) {
       query = query.eq("property_id", propertyId);
@@ -217,12 +217,12 @@ export function useRooms(propertyId?: string, filters?: HousingFilters) {
     error,
     mutate,
     isLoading,
-  } = useSWR(["rooms", propertyId, filters], fetcher);
+  } = useSWR(["room", propertyId, filters], fetcher);
 
   const createRoom = useCallback(
     async (roomData: CreateRoom) => {
       const { data, error } = await supabase
-        .from("rooms")
+        .from("room")
         .insert([roomData])
         .select()
         .single();
@@ -237,7 +237,7 @@ export function useRooms(propertyId?: string, filters?: HousingFilters) {
   const updateRoom = useCallback(
     async (id: string, updates: UpdateRoom) => {
       const { data, error } = await supabase
-        .from("rooms")
+        .from("room")
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq("id", id)
         .select()
@@ -252,7 +252,7 @@ export function useRooms(propertyId?: string, filters?: HousingFilters) {
 
   const deleteRoom = useCallback(
     async (id: string) => {
-      const { error } = await supabase.from("rooms").delete().eq("id", id);
+      const { error } = await supabase.from("room").delete().eq("id", id);
 
       if (error) throw error;
       await mutate();
@@ -268,7 +268,7 @@ export function useRooms(propertyId?: string, filters?: HousingFilters) {
     ): Promise<RoomAvailability> => {
       // Get room details
       const { data: room, error: roomError } = await supabase
-        .from("rooms")
+        .from("room")
         .select("*")
         .eq("id", roomId)
         .single();
@@ -365,7 +365,7 @@ export function useRoomAssignments(filters?: HousingFilters) {
     async (assignmentData: CreateRoomAssignment) => {
       // First check room availability
       const { data: room } = await supabase
-        .from("rooms")
+        .from("room")
         .select("capacity")
         .eq("id", assignmentData.roomId)
         .single();
@@ -518,7 +518,7 @@ export function usePropertiesWithRooms(filters?: HousingFilters) {
       .select(
         `
         *,
-        rooms(*)
+        room(*)
       `
       )
       .order("name");
@@ -587,7 +587,7 @@ export function useHousingAssignments(staffId?: string) {
       .select(
         `
         *,
-        room:rooms (
+        room:room (
           *,
           property:property (*)
         )
@@ -623,7 +623,7 @@ export function useRoomDetails(roomId?: string) {
     if (!roomId) return null;
 
     const { data, error } = await supabase
-      .from("rooms")
+      .from("room")
       .select(
         `
         *,

@@ -290,9 +290,9 @@ export function PropertyList({
           </div>
 
           {/* Data Table */}
-          <DataTable
+          <DataTable<Property, any>
             columns={columns}
-            data={properties || []}
+            data={(properties || []) as Property[]}
             loading={isLoading}
             searchKey="name"
             onRowClick={onPropertySelect}
