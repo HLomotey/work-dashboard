@@ -30,29 +30,37 @@ export function useProperties(filters?: HousingFilters) {
   const supabase = createClient();
 
   const fetcher = useCallback(async () => {
-    // Use mock data if Supabase is not properly configured
-    if (shouldUseMockData()) {
-      const mockData = await mockHousingAPI.getPropertiesWithRooms();
-      let filteredData = mockData;
-
-      if (filters?.status) {
-        filteredData = filteredData.filter(p => p.status === filters.status);
-      }
-
-      if (filters?.search) {
-        const searchLower = filters.search.toLowerCase();
-        filteredData = filteredData.filter(p => 
-          p.name.toLowerCase().includes(searchLower) ||
-          p.address.toLowerCase().includes(searchLower)
-        );
-      }
-
-      return filteredData;
-    }
-
-    // Original Supabase logic
+    // Always try Supabase first, but gracefully fall back to mock data
     try {
-      let query = supabase.from("properties").select("*").order("name");
+      // Check if Supabase is properly configured
+      if (
+        !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+        !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      ) {
+        console.warn("Supabase not configured, using mock data");
+        throw new Error("Supabase not configured");
+      }
+
+      let query = supabase.from("property").select(`
+          id,
+          name,
+          address,
+          description,
+          photos,
+          total_capacity,
+          status,
+          created_at,
+          updated_at,
+          rooms (
+            id,
+            room_number,
+            capacity,
+            status,
+            amenities,
+            created_at,
+            updated_at
+          )
+        `);
 
       if (filters?.status) {
         query = query.eq("status", filters.status);
@@ -65,11 +73,59 @@ export function useProperties(filters?: HousingFilters) {
       }
 
       const { data, error } = await query;
-      if (error) throw error;
-      return data as Property[];
+
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+
+      return (
+        data?.map((property) => ({
+          id: property.id,
+          name: property.name,
+          address: property.address,
+          description: property.description,
+          photos: property.photos || [],
+          totalCapacity: property.total_capacity,
+          status: property.status as PropertyStatus,
+          createdAt: new Date(property.created_at),
+          updatedAt: new Date(property.updated_at),
+          rooms:
+            property.rooms?.map((room) => ({
+              id: room.id,
+              propertyId: property.id,
+              roomNumber: room.room_number,
+              capacity: room.capacity,
+              status: room.status as RoomStatus,
+              amenities: room.amenities || [],
+              createdAt: new Date(room.created_at),
+              updatedAt: new Date(room.updated_at),
+            })) || [],
+        })) || []
+      );
     } catch (error) {
-      console.warn('Supabase error, falling back to mock data:', error);
-      return await mockHousingAPI.getPropertiesWithRooms();
+      console.warn(
+        "Supabase request failed, falling back to mock data:",
+        error
+      );
+      // Fall back to mock data on any error (including 401, network issues, etc.)
+      const mockData = await mockHousingAPI.getPropertiesWithRooms();
+      let filteredData = mockData;
+
+      if (filters?.status) {
+        filteredData = filteredData.filter((p) => p.status === filters.status);
+      }
+
+      if (filters?.search) {
+        const searchLower = filters.search.toLowerCase();
+        filteredData = filteredData.filter(
+          (p) =>
+            p.name.toLowerCase().includes(searchLower) ||
+            p.address.toLowerCase().includes(searchLower)
+        );
+      }
+
+      return filteredData;
     }
   }, [filters, supabase]);
 
@@ -78,12 +134,12 @@ export function useProperties(filters?: HousingFilters) {
     error,
     mutate,
     isLoading,
-  } = useSWR(["properties", filters], fetcher);
+  } = useSWR(["property", filters], fetcher);
 
   const createProperty = useCallback(
     async (propertyData: CreateProperty) => {
       const { data, error } = await supabase
-        .from("properties")
+        .from("property")
         .insert([propertyData])
         .select()
         .single();
@@ -98,7 +154,7 @@ export function useProperties(filters?: HousingFilters) {
   const updateProperty = useCallback(
     async (id: string, updates: UpdateProperty) => {
       const { data, error } = await supabase
-        .from("properties")
+        .from("property")
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq("id", id)
         .select()
@@ -113,7 +169,7 @@ export function useProperties(filters?: HousingFilters) {
 
   const deleteProperty = useCallback(
     async (id: string) => {
-      const { error } = await supabase.from("properties").delete().eq("id", id);
+      const { error } = await supabase.from("property").delete().eq("id", id);
 
       if (error) throw error;
       await mutate();
@@ -277,7 +333,7 @@ export function useRoomAssignments(filters?: HousingFilters) {
         `
         *,
         room:rooms(*),
-        property:rooms(properties(*)),
+        property:rooms(property(*)),
         staff:staff(*)
       `
       )
@@ -399,12 +455,12 @@ export function useHousingAnalytics(dateRange?: { start: Date; end: Date }) {
   const fetcher = useCallback(async (): Promise<OccupancyMetrics> => {
     // Get total properties and rooms
     const { data: properties } = await supabase
-      .from("properties")
+      .from("property")
       .select("id, total_capacity")
       .eq("status", "active");
 
     const { data: rooms } = await supabase
-      .from("rooms")
+      .from("room")
       .select("id, capacity, status");
 
     // Get current active assignments
@@ -458,7 +514,7 @@ export function usePropertiesWithRooms(filters?: HousingFilters) {
 
   const fetcher = useCallback(async () => {
     let query = supabase
-      .from("properties")
+      .from("property")
       .select(
         `
         *,
@@ -528,13 +584,15 @@ export function useHousingAssignments(staffId?: string) {
 
     const { data, error } = await supabase
       .from("room_assignments")
-      .select(`
+      .select(
+        `
         *,
         room:rooms (
           *,
-          property:properties (*)
+          property:property (*)
         )
-      `)
+      `
+      )
       .eq("staff_id", staffId)
       .order("start_date", { ascending: false });
 
@@ -547,10 +605,7 @@ export function useHousingAssignments(staffId?: string) {
     error,
     mutate,
     isLoading,
-  } = useSWR(
-    staffId ? ["housing_assignments", staffId] : null,
-    fetcher
-  );
+  } = useSWR(staffId ? ["housing_assignments", staffId] : null, fetcher);
 
   return {
     assignments,
@@ -569,14 +624,16 @@ export function useRoomDetails(roomId?: string) {
 
     const { data, error } = await supabase
       .from("rooms")
-      .select(`
+      .select(
+        `
         *,
-        property:properties (*),
+        property:property (*),
         assignments:room_assignments (
           *,
           staff:staff (*)
         )
-      `)
+      `
+      )
       .eq("id", roomId)
       .single();
 
@@ -589,10 +646,7 @@ export function useRoomDetails(roomId?: string) {
     error,
     mutate,
     isLoading,
-  } = useSWR(
-    roomId ? ["room_details", roomId] : null,
-    fetcher
-  );
+  } = useSWR(roomId ? ["room_details", roomId] : null, fetcher);
 
   return {
     room,
@@ -623,8 +677,8 @@ export function useHousingRequests(staffId?: string) {
         reviewedAt: null,
         reviewedBy: null,
         notes: null,
-        attachments: []
-      }
+        attachments: [],
+      },
     ];
   }, [staffId]);
 
@@ -633,30 +687,30 @@ export function useHousingRequests(staffId?: string) {
     error,
     mutate,
     isLoading,
-  } = useSWR(
-    staffId ? ["housing_requests", staffId] : null,
-    fetcher
+  } = useSWR(staffId ? ["housing_requests", staffId] : null, fetcher);
+
+  const submitRequest = useCallback(
+    async (request: any) => {
+      if (!staffId) throw new Error("Staff ID is required");
+
+      // Mock submission - replace with actual API call
+      const newRequest = {
+        id: Date.now().toString(),
+        staffId,
+        ...request,
+        status: "pending",
+        submittedAt: new Date(),
+        reviewedAt: null,
+        reviewedBy: null,
+        notes: null,
+      };
+
+      mutate([...(requests || []), newRequest], false);
+
+      return newRequest;
+    },
+    [staffId, requests, mutate]
   );
-
-  const submitRequest = useCallback(async (request: any) => {
-    if (!staffId) throw new Error("Staff ID is required");
-
-    // Mock submission - replace with actual API call
-    const newRequest = {
-      id: Date.now().toString(),
-      staffId,
-      ...request,
-      status: "pending",
-      submittedAt: new Date(),
-      reviewedAt: null,
-      reviewedBy: null,
-      notes: null
-    };
-
-    mutate([...(requests || []), newRequest], false);
-
-    return newRequest;
-  }, [staffId, requests, mutate]);
 
   return {
     requests,

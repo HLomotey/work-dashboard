@@ -105,7 +105,7 @@ export function DataTable<TData, TValue>({
   }, [columns, enableRowSelection])
 
   const table = useReactTable({
-    data,
+    data: data || [], // Ensure data is never undefined
     columns: tableColumns,
     onSortingChange: enableSorting ? setSorting : undefined,
     onColumnFiltersChange: enableFiltering ? setColumnFilters : undefined,

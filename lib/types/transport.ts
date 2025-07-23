@@ -185,6 +185,11 @@ export interface TransportFilters {
   dateFrom?: Date
   dateTo?: Date
   driverId?: string
+  route?: string
+  dateRange?: {
+    start: Date
+    end: Date
+  }
 }
 
 export interface VehicleFilters {

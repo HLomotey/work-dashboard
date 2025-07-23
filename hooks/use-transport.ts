@@ -3,6 +3,10 @@
 import { useState, useCallback } from 'react'
 import useSWR from 'swr'
 import { createClient } from '@/lib/supabase/client'
+import {
+  TripStatus,
+  VehicleStatus
+} from '@/lib/types/transport'
 import type {
   Vehicle,
   Trip,
@@ -19,9 +23,7 @@ import type {
   TransportFilters,
   FleetMetrics,
   VehicleUtilization,
-  RouteAnalytics,
-  VehicleStatus,
-  TripStatus
+  RouteAnalytics
 } from '@/lib/types/transport'
 
 // Vehicles Hook
@@ -303,7 +305,7 @@ export function useTripPassengers(tripId?: string) {
     if (!trip) throw new Error('Trip not found')
     
     const currentPassengers = passengers?.length || 0
-    if (currentPassengers >= trip.vehicle.capacity) {
+    if (currentPassengers >= (trip.vehicle as any)?.capacity) {
       throw new Error('Trip is at full capacity')
     }
 
@@ -406,7 +408,7 @@ export function useTransportAnalytics(dateRange?: { start: Date; end: Date }) {
     
     const averageLoadFactor = totalTrips > 0 
       ? completedTrips.reduce((sum, t) => {
-          const vehicle = vehicles?.find(v => v.id === t.vehicle_id)
+          const vehicle = vehicles?.find(v => v.id === (t as any).vehicle_id)
           return sum + (vehicle ? (t.passenger_count / vehicle.capacity) * 100 : 0)
         }, 0) / totalTrips
       : 0
