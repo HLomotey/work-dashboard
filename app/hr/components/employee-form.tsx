@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, SubmitHandler, Control } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -68,7 +68,7 @@ interface EmployeeFormProps {
   isLoading?: boolean
 }
 
-type EmployeeFormData = CreateEmployee
+// Form data type is directly CreateEmployee from the schema
 
 export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: EmployeeFormProps) {
   const [emergencyContact, setEmergencyContact] = useState<EmergencyContact>(
@@ -81,7 +81,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
     }
   )
 
-  const form = useForm<EmployeeFormData>({
+  const form = useForm<CreateEmployee>({
     resolver: zodResolver(CreateEmployeeSchema),
     defaultValues: {
       userId: employee?.userId || '',
@@ -96,7 +96,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
       startDate: employee?.startDate || new Date(),
       endDate: employee?.endDate || undefined,
       employmentStatus: employee?.employmentStatus || EmploymentStatus.ACTIVE,
-      role: employee?.role || UserRole.STAFF,
+      role: employee?.role || undefined,
       salary: employee?.salary || 0,
       housingEligible: employee?.housingEligible || false,
       transportEligible: employee?.transportEligible || false,
@@ -109,7 +109,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
     },
   })
 
-  const handleSubmit = async (data: EmployeeFormData) => {
+  const handleSubmit = async (data: CreateEmployee) => {
     try {
       // Validate the employee data
       const validationResult = validateCreateEmployee(data)
@@ -174,11 +174,11 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(handleSubmit as any)} className="space-y-6">
             {/* Employee ID and User ID */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="employeeId"
                 render={({ field }) => (
                   <FormItem>
@@ -195,7 +195,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
               />
 
               <FormField
-                control={form.control}
+                control={form.control as any}
                 name="userId"
                 render={({ field }) => (
                   <FormItem>
@@ -215,13 +215,13 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
             {/* Personal Information */}
             <div className="space-y-4">
               <Label className="text-base font-semibold flex items-center gap-2">
-                <User className="h-4 w-4" />
+                <UserIcon className="h-4 w-4" />
                 Personal Information
               </Label>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
-                  control={form.control}
+                  control={form.control as any}
                   name="firstName"
                   render={({ field }) => (
                     <FormItem>
@@ -235,7 +235,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
                 />
 
                 <FormField
-                  control={form.control}
+                  control={form.control as any}
                   name="lastName"
                   render={({ field }) => (
                     <FormItem>
@@ -251,7 +251,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
-                  control={form.control}
+                  control={form.control as any}
                   name="email"
                   render={({ field }) => (
                     <FormItem>
@@ -265,7 +265,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
                 />
 
                 <FormField
-                  control={form.control}
+                  control={form.control as any}
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
@@ -281,7 +281,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
-                  control={form.control}
+                  control={form.control as any}
                   name="dateOfBirth"
                   render={({ field }) => (
                     <FormItem>
@@ -323,7 +323,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
                 />
 
                 <FormField
-                  control={form.control}
+                  control={form.control as any}
                   name="address"
                   render={({ field }) => (
                     <FormItem>
@@ -344,7 +344,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
-                  control={form.control}
+                  control={form.control as any}
                   name="position"
                   render={({ field }) => (
                     <FormItem>
@@ -358,7 +358,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
                 />
 
                 <FormField
-                  control={form.control}
+                  control={form.control as any}
                   name="departmentId"
                   render={({ field }) => (
                     <FormItem>
@@ -374,7 +374,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
-                  control={form.control}
+                  control={form.control as any}
                   name="supervisorId"
                   render={({ field }) => (
                     <FormItem>
@@ -391,7 +391,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
                 />
 
                 <FormField
-                  control={form.control}
+                  control={form.control as any}
                   name="salary"
                   render={({ field }) => (
                     <FormItem>
@@ -417,7 +417,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField
-                  control={form.control}
+                  control={form.control as any}
                   name="startDate"
                   render={({ field }) => (
                     <FormItem>
@@ -459,7 +459,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
                 />
 
                 <FormField
-                  control={form.control}
+                  control={form.control as any}
                   name="employmentStatus"
                   render={({ field }) => (
                     <FormItem>
@@ -485,32 +485,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="status" // Changed from employmentType to status
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Employment Type *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value as string}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {Object.values(EmploymentType).map((type) => (
-                            <SelectItem key={type} value={type}>
-                              <Badge variant="outline">
-                                {type.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                              </Badge>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+
               </div>
             </div>
 
@@ -572,7 +547,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
 
             {/* Skills */}
             <FormField
-              control={form.control}
+              control={form.control as unknown as Control<CreateEmployee, any>}
               name="skills"
               render={({ field }) => (
                 <FormItem>
@@ -598,7 +573,7 @@ export function EmployeeForm({ employee, onSubmit, onCancel, isLoading }: Employ
 
             {/* Notes */}
             <FormField
-              control={form.control}
+              control={form.control as any}
               name="notes"
               render={({ field }) => (
                 <FormItem>

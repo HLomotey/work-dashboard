@@ -5,30 +5,34 @@ export interface Property {
   id: string;
   name: string;
   address: string;
-  type: string;
-  total_capacity: number;
-  occupied_rooms: number;
+  description?: string;
+  photos?: string[];
+  totalCapacity: number;
   status: 'active' | 'inactive' | 'maintenance';
-  rooms?: Room[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Room {
   id: string;
-  property_id: string;
-  room_number: string;
+  propertyId: string;
+  roomNumber: string;
   capacity: number;
-  occupied: number;
-  status: 'available' | 'occupied' | 'maintenance';
+  status: 'available' | 'occupied' | 'maintenance' | 'out_of_order';
   amenities: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface RoomAssignment {
   id: string;
-  room_id: string;
-  staff_id: string;
-  status: 'active' | 'inactive';
-  start_date: string;
-  end_date?: string;
+  roomId: string;
+  staffId: string;
+  status: 'active' | 'pending' | 'completed' | 'cancelled';
+  startDate: Date;
+  endDate?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // Mock data
@@ -37,104 +41,111 @@ const mockProperties: Property[] = [
     id: '1',
     name: 'Executive Apartments',
     address: '123 Corporate Drive',
-    type: 'apartment',
-    total_capacity: 50,
-    occupied_rooms: 35,
+    description: 'Modern executive apartments for senior staff',
+    photos: ['/images/property1.jpg'],
+    totalCapacity: 50,
     status: 'active',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
   },
   {
     id: '2',
     name: 'Staff Dormitory A',
     address: '456 Staff Lane',
-    type: 'dormitory',
-    total_capacity: 100,
-    occupied_rooms: 87,
+    description: 'Shared dormitory facilities for general staff',
+    photos: ['/images/property2.jpg'],
+    totalCapacity: 100,
     status: 'active',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
   },
   {
     id: '3',
     name: 'Guest House',
-    address: '789 Guest Street',
-    type: 'guesthouse',
-    total_capacity: 20,
-    occupied_rooms: 12,
-    status: 'active',
+    address: '789 Visitor Street',
+    description: 'Temporary accommodation for visitors and guests',
+    photos: ['/images/property3.jpg'],
+    totalCapacity: 20,
+    status: 'maintenance',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
   },
 ];
 
 const mockRooms: Room[] = [
   {
     id: '1',
-    property_id: '1',
-    room_number: 'A101',
+    propertyId: '1',
+    roomNumber: '101',
     capacity: 2,
-    occupied: 2,
     status: 'occupied',
-    amenities: ['WiFi', 'AC', 'Kitchen'],
+    amenities: ['wifi', 'ac', 'private_bathroom'],
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
   },
   {
     id: '2',
-    property_id: '1',
-    room_number: 'A102',
+    propertyId: '1',
+    roomNumber: '102',
     capacity: 2,
-    occupied: 0,
     status: 'available',
-    amenities: ['WiFi', 'AC', 'Kitchen'],
+    amenities: ['wifi', 'ac', 'private_bathroom'],
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
   },
   {
     id: '3',
-    property_id: '2',
-    room_number: 'B201',
+    propertyId: '2',
+    roomNumber: '201',
     capacity: 4,
-    occupied: 3,
     status: 'occupied',
-    amenities: ['WiFi', 'Shared Kitchen'],
+    amenities: ['wifi', 'shared_bathroom'],
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
   },
 ];
 
 const mockAssignments: RoomAssignment[] = [
   {
     id: '1',
-    room_id: '1',
-    staff_id: 'staff_1',
+    roomId: '1',
+    staffId: 'staff-1',
     status: 'active',
-    start_date: '2024-01-01',
+    startDate: new Date('2024-01-01'),
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
   },
   {
     id: '2',
-    room_id: '3',
-    staff_id: 'staff_2',
+    roomId: '3',
+    staffId: 'staff-2',
     status: 'active',
-    start_date: '2024-02-01',
+    startDate: new Date('2024-02-01'),
+    createdAt: new Date('2024-02-01'),
+    updatedAt: new Date('2024-02-01'),
   },
 ];
 
 // Mock API functions
 export const mockHousingAPI = {
   // Get properties with capacity summary
-  getPropertiesCapacity: async (): Promise<Property[]> => {
-    return mockProperties.map(p => ({
-      id: p.id,
-      total_capacity: p.total_capacity,
-      status: p.status,
-    })) as Property[];
+  getPropertiesCapacity(): Promise<Property[]> {
+    return Promise.resolve(mockProperties);
   },
 
   // Get all properties with rooms
   getPropertiesWithRooms: async (): Promise<Property[]> => {
     return mockProperties.map(property => ({
       ...property,
-      rooms: mockRooms.filter(room => room.property_id === property.id),
+      rooms: mockRooms.filter(room => room.propertyId === property.id),
     }));
   },
 
   // Get rooms summary
-  getRoomsSummary: async (): Promise<Room[]> => {
-    return mockRooms.map(room => ({
-      id: room.id,
-      capacity: room.capacity,
-      status: room.status,
-    })) as Room[];
+  getRoomsSummary(): Promise<Room[]> {
+    return Promise.resolve(
+      mockRooms.filter(r => r.propertyId === '1')
+    );
   },
 
   // Get active room assignments

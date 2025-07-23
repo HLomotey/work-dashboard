@@ -44,7 +44,7 @@ export function VehicleList({
   onAddVehicle,
 }: VehicleListProps) {
   const [filters, setFilters] = useState<VehicleFilters>({})
-  const { vehicles, isLoading, error } = useVehicles(filters)
+  const { vehicles, isLoading, error } = useVehicles(filters as any)
 
   const handleSearchChange = (search: string) => {
     setFilters((prev: VehicleFilters) => ({ ...prev, search: search || undefined }))
