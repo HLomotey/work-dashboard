@@ -27,6 +27,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useVehicles } from '@/hooks/use-transport'
 import {
   VehicleStatus,
+  VehicleType,
   CreateVehicleSchema,
   UpdateVehicleSchema,
   type Vehicle,

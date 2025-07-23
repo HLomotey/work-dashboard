@@ -28,7 +28,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useVehicles } from '@/hooks/use-transport'
-import { VehicleStatus, type TransportFilters } from '@/lib/types/transport'
+import { VehicleStatus, type Vehicle, type VehicleFilters } from '@/lib/types/transport'
 
 interface VehicleListProps {
   onVehicleSelect?: (vehicleId: string) => void
@@ -43,15 +43,15 @@ export function VehicleList({
   onVehicleDelete,
   onAddVehicle,
 }: VehicleListProps) {
-  const [filters, setFilters] = useState<TransportFilters>({})
+  const [filters, setFilters] = useState<VehicleFilters>({})
   const { vehicles, isLoading, error } = useVehicles(filters)
 
   const handleSearchChange = (search: string) => {
-    setFilters(prev => ({ ...prev, search: search || undefined }))
+    setFilters((prev: VehicleFilters) => ({ ...prev, search: search || undefined }))
   }
 
   const handleStatusFilter = (status: string) => {
-    setFilters(prev => ({
+    setFilters((prev: VehicleFilters) => ({
       ...prev,
       status: status === 'all' ? undefined : (status as VehicleStatus)
     }))

@@ -26,13 +26,8 @@ import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { useVehicles, useTrips } from '@/hooks/use-transport'
-import {
-  TripStatus,
-  CreateTripSchema,
-  type Vehicle,
-  type Trip,
-  type CreateTrip,
-} from '@/lib/types/transport'
+import { Trip, TripStatus, CreateTrip, CreateTripSchema, UpdateTripSchema } from '@/lib/types/transport'
+import { Vehicle } from '@/lib/types/transport'
 import { format } from 'date-fns'
 
 interface TripLoggerProps {

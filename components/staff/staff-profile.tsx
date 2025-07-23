@@ -63,8 +63,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useStaffProfile } from '@/hooks/use-staff'
 import { z } from 'zod'
-import type { StaffWithProfile } from '@/lib/types/user'
-import { EmploymentStatus, UserRole } from '@/lib/types/user'
+import type { StaffWithProfile } from '@/lib/supabase/types/user'
+import { EmploymentStatus, UserRole } from '@/lib/supabase/types/employee'
+import { EmergencyContactSchema } from '@/lib/supabase/types/employee'
 import { cn } from '@/lib/utils'
 
 interface StaffProfileProps {
@@ -72,28 +73,26 @@ interface StaffProfileProps {
   onProfileUpdated?: (profile: any) => void
 }
 
-// Form schemas
+// Form schemas - aligned with Supabase employee types
 const personalInfoSchema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
+  firstName: z.string().min(1, 'First name is required').max(50),
+  lastName: z.string().min(1, 'Last name is required').max(50),
   email: z.string().email('Invalid email address'),
-  phone: z.string().optional(),
+  phone: z.string().max(20).optional(),
   dateOfBirth: z.date().optional(),
-  address: z.string().optional(),
-  emergencyContact: z.object({
-    name: z.string().optional(),
-    phone: z.string().optional(),
-    relationship: z.string().optional(),
-  }).optional(),
+  address: z.string().max(500).optional(),
+  emergencyContact: EmergencyContactSchema.optional(),
 })
 
 const professionalInfoSchema = z.object({
-  department: z.string().optional(),
-  position: z.string().optional(),
+  departmentId: z.string().uuid().optional(),
+  position: z.string().min(1, 'Position is required').max(100),
   startDate: z.date().optional(),
-  supervisor: z.string().optional(),
+  supervisorId: z.string().uuid().optional(),
   skills: z.array(z.string()).optional(),
-  bio: z.string().max(500).optional(),
+  bio: z.string().max(1000).optional(),
+  employmentStatus: z.nativeEnum(EmploymentStatus).optional(),
+  role: z.nativeEnum(UserRole).optional(),
 })
 
 type PersonalInfoForm = z.infer<typeof personalInfoSchema>
@@ -183,12 +182,14 @@ export function StaffProfile({ staffId, onProfileUpdated }: StaffProfileProps) {
   const professionalForm = useForm<ProfessionalInfoForm>({
     resolver: zodResolver(professionalInfoSchema),
     defaultValues: {
-      department: typeof (staffProfile as any).department === 'string' ? (staffProfile as any).department : (staffProfile as any).department?.name || '',
-      position: (staffProfile as any).position || '',
+      departmentId: typeof (staffProfile as any).department === 'string' ? (staffProfile as any).departmentId : (staffProfile as any).department?.id || '',
+      position: (staffProfile as any).position || 'Senior Software Engineer',
       startDate: (staffProfile as any).startDate || new Date(),
-      supervisor: (staffProfile as any).profile?.supervisor || '',
+      supervisorId: (staffProfile as any).profile?.supervisorId || '',
       skills: (staffProfile as any).profile?.skills || [],
       bio: (staffProfile as any).profile?.bio || '',
+      employmentStatus: (staffProfile as any).employmentStatus || EmploymentStatus.ACTIVE,
+      role: (staffProfile as any).role || UserRole.STAFF,
     },
   })
 
@@ -616,12 +617,12 @@ export function StaffProfile({ staffId, onProfileUpdated }: StaffProfileProps) {
                     <div className="grid grid-cols-2 gap-4">
                       <FormField
                         control={professionalForm.control}
-                        name="department"
+                        name="departmentId"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Department</FormLabel>
+                            <FormLabel>Department ID</FormLabel>
                             <FormControl>
-                              <Input {...field} />
+                              <Input {...field} placeholder="Department UUID" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -644,18 +645,17 @@ export function StaffProfile({ staffId, onProfileUpdated }: StaffProfileProps) {
 
                     <FormField
                       control={professionalForm.control}
-                      name="supervisor"
+                      name="supervisorId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Supervisor</FormLabel>
+                          <FormLabel>Supervisor ID</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input {...field} placeholder="Supervisor UUID" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-
                     <FormField
                       control={professionalForm.control}
                       name="bio"

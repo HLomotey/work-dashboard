@@ -132,6 +132,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { setTheme, theme } = useTheme()
   const pathname = usePathname()
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({})
+  const [isExpanded, setIsExpanded] = useState(false)
 
   // Initialize expanded state based on current path
   useEffect(() => {
@@ -149,19 +150,38 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       ...prev,
       [title]: !prev[title]
     }))
+    // Auto-expand sidebar when clicking on items with children
+    setIsExpanded(true)
+  }
+
+  const handleMouseLeave = () => {
+    // Only collapse if no items are expanded
+    if (Object.values(expandedItems).every(value => !value)) {
+      setIsExpanded(false)
+    }
   }
 
   return (
     <Sidebar
       collapsible="icon"
-      className="group/sidebar w-[--sidebar-width-icon] hover:w-64 transition-all duration-300 ease-in-out"
+      className={cn(
+        "group/sidebar transition-all duration-300 ease-in-out",
+        isExpanded ? "w-64" : "w-[--sidebar-width-icon] hover:w-64"
+      )}
+      onMouseLeave={handleMouseLeave}
       {...props}
     >
       <SidebarHeader>
         <div className="flex items-center gap-2 px-4 py-2">
           <BarChart3 className="h-6 w-6" />
-          <span className="font-semibold hidden group-hover/sidebar:inline">Corporate Dashboard</span>
-          <span className="font-semibold inline group-hover/sidebar:hidden">CD</span>
+          <span className={cn(
+            "font-semibold transition-opacity duration-200",
+            isExpanded ? "inline" : "hidden group-hover/sidebar:inline"
+          )}>Corporate Dashboard</span>
+          <span className={cn(
+            "font-semibold transition-opacity duration-200",
+            isExpanded ? "hidden" : "inline group-hover/sidebar:hidden"
+          )}>CD</span>
         </div>
       </SidebarHeader>
       <SidebarContent>
@@ -178,12 +198,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         className="hover:bg-orange-500 hover:text-white transition-colors duration-200 justify-center group-hover/sidebar:justify-start"
                       >
                         {item.icon && <item.icon />}
-                        <span className="hidden group-hover/sidebar:block">
+                        <span className={cn(
+                          "transition-opacity duration-200",
+                          isExpanded ? "block" : "hidden group-hover/sidebar:block"
+                        )}>
                           {item.title}
                         </span>
                         <ChevronRight 
                           className={cn(
-                            "ml-auto hidden group-hover/sidebar:block transition-transform duration-200", 
+                            "ml-auto transition-transform duration-200",
+                            isExpanded ? "block" : "hidden group-hover/sidebar:block",
                             expandedItems[item.title] && "rotate-90"
                           )} 
                         />
@@ -195,7 +219,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           "overflow-hidden transition-all duration-300 ease-in-out",
                           !expandedItems[item.title] && "h-0",
                           expandedItems[item.title] && "h-auto",
-                          "hidden group-hover/sidebar:block"
+                          isExpanded ? "block" : "hidden group-hover/sidebar:block"
                         )}
                       >
                         <SidebarMenuSub>
@@ -225,7 +249,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     >
                       <Link href={item.url || "#"}>
                         {item.icon && <item.icon />}
-                        <span className="hidden group-hover/sidebar:block">
+                        <span className={cn(
+                          "transition-opacity duration-200",
+                          isExpanded ? "block" : "hidden group-hover/sidebar:block"
+                        )}>
                           {item.title}
                         </span>
                       </Link>
@@ -246,7 +273,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="hover:bg-orange-500 hover:text-white transition-colors duration-200 justify-center group-hover/sidebar:justify-start"
             >
               {theme === "dark" ? <Sun /> : <Moon />}
-              <span className="hidden group-hover/sidebar:block">
+              <span className={cn(
+                "transition-opacity duration-200",
+                isExpanded ? "block" : "hidden group-hover/sidebar:block"
+              )}>
                 Toggle Theme
               </span>
             </SidebarMenuButton>

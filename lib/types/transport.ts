@@ -19,15 +19,34 @@ export enum TripStatus {
 export const VehicleStatusSchema = z.nativeEnum(VehicleStatus)
 export const TripStatusSchema = z.nativeEnum(TripStatus)
 
+// Vehicle Type enum
+export enum VehicleType {
+  CAR = 'car',
+  VAN = 'van',
+  BUS = 'bus',
+  TRUCK = 'truck',
+  MOTORCYCLE = 'motorcycle'
+}
+
+export const VehicleTypeSchema = z.nativeEnum(VehicleType)
+
 // Vehicle schemas
 export const VehicleSchema = z.object({
   id: z.string().uuid(),
   make: z.string().min(1, 'Vehicle make is required').max(100),
   model: z.string().min(1, 'Vehicle model is required').max(100),
   year: z.number().int().min(1900).max(new Date().getFullYear() + 1),
+  type: VehicleTypeSchema,
   capacity: z.number().int().positive('Vehicle capacity must be positive').max(100),
   registration: z.string().min(1, 'Registration is required').max(50),
+  licensePlate: z.string().min(1, 'License plate is required').max(20),
   status: VehicleStatusSchema,
+  fuelType: z.string().max(50).optional(),
+  color: z.string().max(50).optional(),
+  mileage: z.number().positive().optional(),
+  lastServiceDate: z.date().optional(),
+  nextServiceDate: z.date().optional(),
+  insuranceExpiry: z.date().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 })
@@ -46,12 +65,17 @@ const BaseTripSchema = z.object({
   vehicleId: z.string().uuid(),
   date: z.date(),
   route: z.string().min(1, 'Route is required').max(255),
+  startLocation: z.string().min(1, 'Start location is required').max(255),
+  endLocation: z.string().min(1, 'End location is required').max(255),
+  purpose: z.string().min(1, 'Purpose is required').max(255),
   passengerCount: z.number().int().min(0).max(100),
   distance: z.number().positive().optional(),
   cost: z.number().positive().optional(),
   driverId: z.string().uuid(),
   status: TripStatusSchema,
   notes: z.string().max(500).optional(),
+  startTime: z.string().optional(),
+  endTime: z.string().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 })
@@ -153,18 +177,24 @@ export interface TripPassengerWithDetails extends TripPassenger {
   }
 }
 
-// Utility types for transport operations
-export type TransportFilters = {
+// Filter interfaces for transport components
+export interface TransportFilters {
   vehicleId?: string
-  driverId?: string
-  status?: VehicleStatus | TripStatus
-  dateRange?: {
-    start: Date
-    end: Date
-  }
-  route?: string
+  status?: TripStatus
   search?: string
+  dateFrom?: Date
+  dateTo?: Date
+  driverId?: string
 }
+
+export interface VehicleFilters {
+  status?: VehicleStatus
+  search?: string
+  make?: string
+  model?: string
+}
+
+// Utility types for transport operations
 
 export type FleetMetrics = {
   totalVehicles: number

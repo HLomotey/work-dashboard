@@ -32,6 +32,8 @@ import {
   type Trip,
   type CreateTrip,
   type UpdateTrip,
+  type Vehicle,
+  VehicleStatus
 } from '@/lib/types/transport'
 import { format } from 'date-fns'
 
@@ -70,18 +72,32 @@ export function TripForm({
       vehicleId: trip.vehicleId,
       date: trip.date,
       route: trip.route,
+      startLocation: trip.startLocation,
+      endLocation: trip.endLocation,
+      purpose: trip.purpose,
       passengerCount: trip.passengerCount,
       distance: trip.distance,
       cost: trip.cost,
+      driverId: trip.driverId,
       status: trip.status,
+      notes: trip.notes,
+      startTime: trip.startTime,
+      endTime: trip.endTime,
     } : {
       vehicleId: preselectedVehicleId || '',
       date: new Date(),
       route: '',
+      startLocation: '',
+      endLocation: '',
+      purpose: '',
       passengerCount: 1,
       distance: undefined,
       cost: undefined,
+      driverId: '',
       status: TripStatus.SCHEDULED,
+      notes: '',
+      startTime: '',
+      endTime: '',
     },
   })
 

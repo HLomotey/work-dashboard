@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import useSWR from "swr";
 import { createClient } from "@/lib/supabase/client";
+import { mockHousingAPI, shouldUseMockData } from "@/lib/api/housing-mock";
 import type {
   Property,
   Room,
@@ -29,22 +30,48 @@ export function useProperties(filters?: HousingFilters) {
   const supabase = createClient();
 
   const fetcher = useCallback(async () => {
-    let query = supabase.from("properties").select("*").order("name");
+    // Use mock data if Supabase is not properly configured
+    if (shouldUseMockData()) {
+      const mockData = await mockHousingAPI.getPropertiesWithRooms();
+      let filteredData = mockData;
 
-    if (filters?.status) {
-      query = query.eq("status", filters.status);
+      if (filters?.status) {
+        filteredData = filteredData.filter(p => p.status === filters.status);
+      }
+
+      if (filters?.search) {
+        const searchLower = filters.search.toLowerCase();
+        filteredData = filteredData.filter(p => 
+          p.name.toLowerCase().includes(searchLower) ||
+          p.address.toLowerCase().includes(searchLower)
+        );
+      }
+
+      return filteredData;
     }
 
-    if (filters?.search) {
-      query = query.or(
-        `name.ilike.%${filters.search}%,address.ilike.%${filters.search}%`
-      );
-    }
+    // Original Supabase logic
+    try {
+      let query = supabase.from("properties").select("*").order("name");
 
-    const { data, error } = await query;
-    if (error) throw error;
-    return data as Property[];
-  }, [filters]);
+      if (filters?.status) {
+        query = query.eq("status", filters.status);
+      }
+
+      if (filters?.search) {
+        query = query.or(
+          `name.ilike.%${filters.search}%,address.ilike.%${filters.search}%`
+        );
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data as Property[];
+    } catch (error) {
+      console.warn('Supabase error, falling back to mock data:', error);
+      return await mockHousingAPI.getPropertiesWithRooms();
+    }
+  }, [filters, supabase]);
 
   const {
     data: properties,

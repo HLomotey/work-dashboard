@@ -14,7 +14,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useTransportAnalytics, useVehicles, useTrips } from '@/hooks/use-transport'
-import { VehicleStatus, TripStatus } from '@/lib/types/transport'
+import { VehicleStatus, type Vehicle } from '@/lib/supabase/types/vehicle'
+import { TripStatus, type Trip } from '@/lib/supabase/types/trip'
 import { format, subDays, startOfMonth, endOfMonth } from 'date-fns'
 
 interface TransportDashboardProps {

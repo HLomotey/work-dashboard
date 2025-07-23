@@ -28,7 +28,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTrips, useVehicles } from '@/hooks/use-transport'
-import { TripStatus, type TransportFilters } from '@/lib/types/transport'
+import { TripStatus, type Trip, type TransportFilters } from '@/lib/types/transport'
 import { format } from 'date-fns'
 
 interface TripListProps {
@@ -56,18 +56,18 @@ export function TripList({
   const { vehicles } = useVehicles()
 
   const handleSearchChange = (search: string) => {
-    setFilters(prev => ({ ...prev, search: search || undefined }))
+    setFilters((prev: TransportFilters) => ({ ...prev, search: search || undefined }))
   }
 
   const handleStatusFilter = (status: string) => {
-    setFilters(prev => ({
+    setFilters((prev: TransportFilters) => ({
       ...prev,
       status: status === 'all' ? undefined : (status as TripStatus)
     }))
   }
 
   const handleVehicleFilter = (vehicleId: string) => {
-    setFilters(prev => ({
+    setFilters((prev: TransportFilters) => ({
       ...prev,
       vehicleId: vehicleId === 'all' ? undefined : vehicleId
     }))

@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Progress } from '@/components/ui/progress'
 import { useVehicles, useTrips } from '@/hooks/use-transport'
-import { VehicleStatus, TripStatus, type VehicleWithTrips } from '@/lib/types/transport'
+import { VehicleStatus, TripStatus, type Vehicle, type VehicleWithTrips, type Trip } from '@/lib/types/transport'
 import { format } from 'date-fns'
 
 interface VehicleDetailsProps {
