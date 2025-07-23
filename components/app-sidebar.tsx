@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useState, useEffect } from "react"
-import { BarChart3, Briefcase, DollarSign, Home, Moon, Sun, Upload, Users, FileSpreadsheet, ChevronRight, Link2, Database, Globe } from "lucide-react"
+import { BarChart3, Briefcase, DollarSign, Home, Moon, Sun, Upload, Users, FileSpreadsheet, ChevronRight, Link2, Database, Globe, Building, Car, Receipt, UserCheck } from "lucide-react"
 import { useTheme } from "next-themes"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -49,6 +49,32 @@ const data = {
           title: "Field Operations",
           url: "/operations",
           icon: Briefcase,
+        },
+      ],
+    },
+    {
+      title: "Housing & Transport ERP",
+      icon: Building,
+      items: [
+        {
+          title: "Housing Management",
+          url: "/housing",
+          icon: Building,
+        },
+        {
+          title: "Transport Management",
+          url: "/transport",
+          icon: Car,
+        },
+        {
+          title: "Billing Management",
+          url: "/billing",
+          icon: Receipt,
+        },
+        {
+          title: "Staff Portal",
+          url: "/staff",
+          icon: UserCheck,
         },
       ],
     },
