@@ -248,7 +248,7 @@ export function PaymentHistory({ staffId, onExportData }: PaymentHistoryProps) {
   const [selectedPayment, setSelectedPayment] = useState<any>(null)
 
   // In real implementation, this would fetch data based on staffId and filters
-  const { payments, isLoading, error } = usePaymentHistory(staffId, dateRange)
+  const { payments, isLoading, error } = usePaymentHistory(staffId, dateRange.from && dateRange.to ? { start: dateRange.from, end: dateRange.to } : undefined)
   
   // Use mock data for demonstration
   const paymentHistory = mockPaymentHistory
@@ -565,8 +565,13 @@ export function PaymentHistory({ staffId, onExportData }: PaymentHistoryProps) {
                   </SelectContent>
                 </Select>
                 <DatePickerWithRange
-                  date={dateRange}
-                  onDateChange={setDateRange}
+                  date={dateRange.from && dateRange.to ? { from: dateRange.from, to: dateRange.to } : undefined}
+                  onDateChange={(range) => {
+                    setDateRange({
+                      from: range?.from,
+                      to: range?.to
+                    })
+                  }}
                 />
               </div>
 
@@ -656,18 +661,22 @@ export function PaymentHistory({ staffId, onExportData }: PaymentHistoryProps) {
                                         </div>
                                         <div>
                                           <p className="text-sm font-medium text-muted-foreground">Method</p>
-                                          <Badge variant="outline" className={paymentMethodConfig[selectedPayment.method].color}>
-                                            {paymentMethodConfig[selectedPayment.method].label}
+                                          <Badge variant="outline" className={paymentMethodConfig[selectedPayment.method as keyof typeof paymentMethodConfig]?.color || 'text-gray-600'}>
+                                            {paymentMethodConfig[selectedPayment.method as keyof typeof paymentMethodConfig]?.label || selectedPayment.method}
                                           </Badge>
                                         </div>
                                         <div>
                                           <p className="text-sm font-medium text-muted-foreground">Status</p>
-                                          <Badge variant={statusConfig[selectedPayment.status].variant} className="gap-1">
+                                          <Badge variant={statusConfig[selectedPayment.status as keyof typeof statusConfig]?.variant as any || 'secondary'} className="gap-1">
                                             {(() => {
-                                              const IconComponent = statusConfig[selectedPayment.status].icon;
-                                              return <IconComponent className="h-3 w-3" />;
+                                              const config = statusConfig[selectedPayment.status as keyof typeof statusConfig];
+                                              if (config?.icon) {
+                                                const IconComponent = config.icon;
+                                                return <IconComponent className="h-3 w-3" />;
+                                              }
+                                              return null;
                                             })()}
-                                            {statusConfig[selectedPayment.status].label}
+                                            {statusConfig[selectedPayment.status as keyof typeof statusConfig]?.label || selectedPayment.status}
                                           </Badge>
                                         </div>
                                         <div>

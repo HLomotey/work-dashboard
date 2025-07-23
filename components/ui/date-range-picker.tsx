@@ -67,3 +67,6 @@ export function DateRangePicker({
     </div>
   )
 }
+
+// Export alias for backward compatibility
+export { DateRangePicker as DatePickerWithRange }

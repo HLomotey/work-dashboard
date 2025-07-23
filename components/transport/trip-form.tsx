@@ -96,7 +96,7 @@ export function TripForm({
     }
 
     const baseCostPerKm = 0.5 // Base cost per kilometer
-    const passengerMultiplier = 1 + (watchedPassengerCount - 1) * 0.1 // 10% increase per additional passenger
+    const passengerMultiplier = 1 + ((watchedPassengerCount || 0) - 1) * 0.1 // 10% increase per additional passenger
     
     const baseCost = watchedDistance * baseCostPerKm
     const distanceCost = baseCost * passengerMultiplier
@@ -367,7 +367,7 @@ export function TripForm({
                   Base cost: ${costCalculation.baseCost.toFixed(2)} ({watchedDistance}km × $0.50/km)
                 </div>
                 <div className="text-blue-700">
-                  Passenger adjustment: {watchedPassengerCount > 1 ? `+${((watchedPassengerCount - 1) * 10)}%` : 'None'}
+                  Passenger adjustment: {(watchedPassengerCount || 0) > 1 ? `+${(((watchedPassengerCount || 0) - 1) * 10)}%` : 'None'}
                 </div>
                 <div className="font-medium text-blue-800">
                   Total: ${costCalculation.total.toFixed(2)}

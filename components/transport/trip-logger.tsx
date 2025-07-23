@@ -56,7 +56,9 @@ export function TripLogger({
 
   const isEditing = !!trip
 
-  const form = useForm<CreateTrip>({
+  type TripFormData = CreateTrip & { notes?: string }
+  
+  const form = useForm<TripFormData>({
     resolver: zodResolver(CreateTripSchema),
     defaultValues: trip ? {
       vehicleId: trip.vehicleId,
@@ -65,7 +67,7 @@ export function TripLogger({
       passengerCount: trip.passengerCount,
       distance: trip.distance,
       cost: trip.cost,
-      notes: trip.notes,
+      notes: trip.notes || '',
       status: trip.status,
     } : {
       vehicleId: preselectedVehicleId || '',
@@ -90,7 +92,7 @@ export function TripLogger({
     }
   }, [watchedVehicleId, vehicles])
 
-  const onSubmit = async (data: CreateTrip) => {
+  const onSubmit = async (data: TripFormData) => {
     setIsSubmitting(true)
     
     try {

@@ -41,7 +41,7 @@ export const CreateVehicleSchema = VehicleSchema.omit({
 export const UpdateVehicleSchema = CreateVehicleSchema.partial()
 
 // Trip schemas
-export const TripSchema = z.object({
+const BaseTripSchema = z.object({
   id: z.string().uuid(),
   vehicleId: z.string().uuid(),
   date: z.date(),
@@ -51,8 +51,23 @@ export const TripSchema = z.object({
   cost: z.number().positive().optional(),
   driverId: z.string().uuid(),
   status: TripStatusSchema,
+  notes: z.string().max(500).optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
+})
+
+export const TripSchema = BaseTripSchema.refine(
+  (data) => data.date >= new Date(new Date().setHours(0, 0, 0, 0)),
+  {
+    message: 'Trip date cannot be in the past',
+    path: ['date'],
+  }
+)
+
+export const CreateTripSchema = BaseTripSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 }).refine(
   (data) => data.date >= new Date(new Date().setHours(0, 0, 0, 0)),
   {
@@ -61,13 +76,18 @@ export const TripSchema = z.object({
   }
 )
 
-export const CreateTripSchema = TripSchema.omit({
+export const UpdateTripSchema = BaseTripSchema.omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-})
-
-export const UpdateTripSchema = CreateTripSchema.partial().omit({ vehicleId: true })
+  vehicleId: true,
+}).partial().refine(
+  (data) => !data.date || data.date >= new Date(new Date().setHours(0, 0, 0, 0)),
+  {
+    message: 'Trip date cannot be in the past',
+    path: ['date'],
+  }
+)
 
 // Trip Passenger schemas
 export const TripPassengerSchema = z.object({

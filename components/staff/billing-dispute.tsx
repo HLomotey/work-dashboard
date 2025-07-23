@@ -240,7 +240,7 @@ export function BillingDispute({ staffId, chargeId, onDisputeSubmitted }: Billin
   const [selectedDispute, setSelectedDispute] = useState<any>(null)
 
   // In real implementation, this would fetch data based on staffId
-  const { disputes, isLoading, error, createDispute } = useBillingDisputes(staffId)
+  const { disputes, isLoading, error, submitDispute, refresh } = useBillingDisputes(staffId)
   
   // Use mock data for demonstration
   const billingDisputes = mockDisputes
@@ -542,9 +542,9 @@ export function BillingDispute({ staffId, chargeId, onDisputeSubmitted }: Billin
                       <TableCell>
                         <Badge 
                           variant="outline" 
-                          className={disputeTypeConfig[dispute.type].color}
+                          className={`${disputeTypeConfig[dispute.type as keyof typeof disputeTypeConfig]?.color || 'text-gray-600'}`}
                         >
-                          {disputeTypeConfig[dispute.type].label}
+                          {disputeTypeConfig[dispute.type as keyof typeof disputeTypeConfig]?.label || dispute.type}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -592,19 +592,23 @@ export function BillingDispute({ staffId, chargeId, onDisputeSubmitted }: Billin
                                     <p className="text-sm font-medium text-muted-foreground">Type</p>
                                     <Badge 
                                       variant="outline" 
-                                      className={disputeTypeConfig[selectedDispute.type].color}
+                                      className={disputeTypeConfig[selectedDispute.type as keyof typeof disputeTypeConfig]?.color || 'text-gray-600'}
                                     >
-                                      {disputeTypeConfig[selectedDispute.type].label}
+                                      {disputeTypeConfig[selectedDispute.type as keyof typeof disputeTypeConfig]?.label || selectedDispute.type}
                                     </Badge>
                                   </div>
                                   <div>
                                     <p className="text-sm font-medium text-muted-foreground">Status</p>
-                                    <Badge variant={statusConfig[selectedDispute.status].variant} className="gap-1">
+                                    <Badge variant={statusConfig[selectedDispute.status as keyof typeof statusConfig]?.variant as any || 'secondary'} className="gap-1">
                                       {(() => {
-                                        const IconComponent = statusConfig[selectedDispute.status].icon;
-                                        return <IconComponent className="h-3 w-3" />;
+                                        const config = statusConfig[selectedDispute.status as keyof typeof statusConfig];
+                                        if (config?.icon) {
+                                          const IconComponent = config.icon;
+                                          return <IconComponent className="h-3 w-3" />;
+                                        }
+                                        return null;
                                       })()}
-                                      {statusConfig[selectedDispute.status].label}
+                                      {statusConfig[selectedDispute.status as keyof typeof statusConfig]?.label || selectedDispute.status}
                                     </Badge>
                                   </div>
                                   <div>

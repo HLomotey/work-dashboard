@@ -96,7 +96,7 @@ export function RouteOptimizer({ className = '' }: RouteOptimizerProps) {
   })
   const [selectedPriority, setSelectedPriority] = useState<string>('all')
 
-  const { routeAnalytics, isLoading } = useRouteAnalytics(dateRange)
+  const { analytics, isLoading, error, refresh } = useRouteAnalytics(dateRange)
 
   // Filter optimizations by priority
   const filteredOptimizations = mockOptimizations.filter(opt => 

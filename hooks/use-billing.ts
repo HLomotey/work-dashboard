@@ -217,7 +217,7 @@ export function useCharges(filters?: BillingFilters) {
       .eq('id', id)
       .single()
 
-    if (charge?.billing_period?.status === 'exported') {
+    if ((charge?.billing_period as any)?.status === 'exported') {
       throw new Error('Cannot delete charges from exported period')
     }
 
@@ -345,6 +345,7 @@ export function useCharges(filters?: BillingFilters) {
             type: ChargeType.TRANSPORT,
             amount: costPerPassenger,
             description: `Transport for ${trip.route} on ${new Date(trip.date).toLocaleDateString()}`,
+            prorationFactor: 1,
             sourceId: trip.id
           }
 
@@ -516,12 +517,12 @@ export function usePayrollExport(billingPeriodId?: string) {
       fileName,
       recordCount: data.length,
       totalAmount: data.reduce((sum, row) => sum + row.totalDeductions, 0),
-      status: PayrollExportStatus.COMPLETED
+      status: PayrollExportStatus.COMPLETED,
+      format: 'csv'
     })
 
     return csvContent
   }, [generateExportData, createExport])
-
   return {
     exports,
     isLoading,
@@ -817,6 +818,80 @@ export function useChargeHistory(staffId?: string, dateRange?: { start: Date; en
     history,
     isLoading,
     error,
+    refresh: mutate
+  }
+}
+
+// Billing Disputes Hook (for staff self-service)
+export function useBillingDisputes(staffId?: string) {
+  const supabase = createClient()
+  
+  const fetcher = useCallback(async () => {
+    if (!staffId) return []
+    
+    // Mock data for now - replace with actual API call
+    return [
+      {
+        id: '1',
+        staffId,
+        chargeId: 'charge-1',
+        type: 'incorrect_amount',
+        status: 'submitted',
+        amount: 100.00,
+        description: 'Rent amount seems incorrect for partial month',
+        evidence: 'lease-agreement.pdf',
+        submittedAt: new Date('2024-01-20'),
+        updatedAt: new Date('2024-01-20'),
+        response: null,
+        resolvedAt: null
+      },
+      {
+        id: '2',
+        staffId,
+        chargeId: 'charge-2',
+        type: 'unauthorized_charge',
+        status: 'resolved',
+        amount: 50.00,
+        description: 'Charged for utilities during vacation period',
+        evidence: 'vacation-request.pdf',
+        submittedAt: new Date('2024-01-10'),
+        updatedAt: new Date('2024-01-15'),
+        response: 'Charge has been reversed. Refund processed.',
+        resolvedAt: new Date('2024-01-15')
+      }
+    ]
+  }, [staffId])
+
+  const {
+    data: disputes,
+    error,
+    mutate,
+    isLoading
+  } = useSWR(
+    staffId ? ['billing_disputes', staffId] : null,
+    fetcher
+  )
+
+  const submitDispute = useCallback(async (disputeData: any) => {
+    // Mock implementation - replace with actual API call
+    const newDispute = {
+      id: Date.now().toString(),
+      staffId,
+      ...disputeData,
+      status: 'submitted',
+      submittedAt: new Date(),
+      updatedAt: new Date()
+    }
+    
+    await mutate([...(disputes || []), newDispute], false)
+    return newDispute
+  }, [staffId, disputes, mutate])
+
+  return {
+    disputes,
+    isLoading,
+    error,
+    submitDispute,
     refresh: mutate
   }
 }
