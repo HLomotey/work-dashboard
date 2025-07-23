@@ -113,10 +113,12 @@ export function BudgetForm({ budget, onSubmit, onCancel, isLoading }: BudgetForm
   const addLineItem = () => {
     const newItem: BudgetLineItem = {
       id: crypto.randomUUID(),
+      name: '',
       category: BudgetCategory.OPERATIONAL,
       description: '',
       allocatedAmount: 0,
       spentAmount: 0,
+      remainingAmount: 0,
       notes: '',
     }
     setLineItems([...lineItems, newItem])
