@@ -29,7 +29,7 @@ import { AssignmentStatus } from "@/lib/types/housing";
 export function useProperties(filters?: HousingFilters) {
   const supabase = createClient();
 
-  const fetcher = useCallback(async () => {
+  const fetcher = useCallback(async (): Promise<PropertyWithRooms[]> => {
     // Always try Supabase first, but gracefully fall back to mock data
     try {
       // Check if Supabase is properly configured
@@ -75,8 +75,7 @@ export function useProperties(filters?: HousingFilters) {
       const { data, error } = await query;
 
       if (error) {
-        console.error("Supabase error:", error);
-        throw error;
+        throw new Error(`Failed to fetch properties: ${error.message}`);
       }
 
       return (
@@ -101,6 +100,8 @@ export function useProperties(filters?: HousingFilters) {
               createdAt: new Date(room.created_at),
               updatedAt: new Date(room.updated_at),
             })) || [],
+          occupancyRate: 0, // TODO: Calculate from actual assignments
+          availableCapacity: property.total_capacity, // TODO: Calculate from actual assignments
         })) || []
       );
     } catch (error) {
@@ -125,7 +126,14 @@ export function useProperties(filters?: HousingFilters) {
         );
       }
 
-      return filteredData;
+      // Transform mock data to PropertyWithRooms format
+      return filteredData.map((property: any) => ({
+        ...property,
+        photos: property.photos || [],
+        rooms: property.rooms || [],
+        occupancyRate: 0, // Calculate from actual assignments in real implementation
+        availableCapacity: property.totalCapacity, // Calculate from actual assignments in real implementation
+      }));
     }
   }, [filters, supabase]);
 
@@ -135,6 +143,9 @@ export function useProperties(filters?: HousingFilters) {
     mutate,
     isLoading,
   } = useSWR(["property", filters], fetcher);
+
+  // Ensure properties is always an array to prevent undefined errors
+  const safeProperties = properties || [];
 
   const createProperty = useCallback(
     async (propertyData: CreateProperty) => {
@@ -178,7 +189,7 @@ export function useProperties(filters?: HousingFilters) {
   );
 
   return {
-    properties,
+    properties: safeProperties,
     isLoading,
     error,
     createProperty,
