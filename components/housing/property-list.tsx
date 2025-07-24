@@ -292,7 +292,7 @@ export function PropertyList({
           {/* Data Table */}
           <DataTable<Property, any>
             columns={columns}
-            data={(properties || []) as Property[]}
+            data={properties || []}
             loading={isLoading}
             searchKey="name"
             onRowClick={onPropertySelect}
@@ -355,7 +355,7 @@ export function PropertyList({
           />
         )}
       </Modal>
-
+//
       {/* Delete Confirmation Modal */}
       <ConfirmationModal
         open={deleteModal.open}
